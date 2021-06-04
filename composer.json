@@ -1,0 +1,22 @@
+{
+  "name": "vendor_name/bt-manager-product",
+  "description": "description",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "tienpham2009",
+      "email": "email@example.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Models\\": "App/Models",
+      "App\\Controller\\": "App/Controller",
+      "App\\": "App"
+    }
+  },
+  "require": {
+    "ext-pdo": "*"
+  }
+}
