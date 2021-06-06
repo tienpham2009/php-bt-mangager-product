@@ -20,7 +20,7 @@
     <div class="card-header">
         <table style="width: 100%">
             <tr>
-                <td>Danh Sách</td>
+                <td style="text-align: left">Danh Sách</td>
                 <td style="text-align: right"><a class="btn btn-success mb-2" href="./index.php?page=add">Thêm mới</a></td>
             </tr>
         </table>

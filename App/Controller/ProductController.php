@@ -4,81 +4,17 @@ namespace App\Controller;
 
 use App\Products;
 use Models\ProductModels;
+use Service\ProductService;
 
 class ProductController
 {
     protected ProductModels $productDB;
+    protected ProductService $productService;
 
     public function __construct()
     {
         $this->productDB = new ProductModels();
-    }
-
-    public function getImage(): string
-    {
-        $fileError = [];
-        $target_dir = "Images/";
-        $target_file = $target_dir.basename($_FILES["fileToUpload"]["name"]);
-
-        if ($_FILES["fileToUpload"]["size"] > 5000000){
-            $fileError["fileUpload"] = "Chỉ được upload file dưới 5MB";
-        }
-
-        $file_type = pathinfo($_FILES["fileToUpload"]["name"],PATHINFO_EXTENSION);
-
-
-        $file_type_allow = ["jpg","png","jpeg","gif"];
-
-        if (!in_array(strtolower($file_type), $file_type_allow)){
-            $fileError["fileUpload"] = "Chỉ được upload file ảnh";
-        }
-
-        if (file_exists($target_file)){
-            $fileError["fileUpload"] = "File đã tồn tại trên hệ thống";
-        }
-
-        if (empty($fileError)){
-            move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file);
-        }
-        return $target_file;
-    }
-
-
-
-    public function getProducts(): Products
-    {
-        $productCode = $_POST["productCode"];
-        $productName = $_POST["productName"];
-        $productPrice = $_POST["productPrice"];
-        $productDescription = $_POST["productDescription"];
-        $producer = $_POST["producer"];
-        $productImage = $this->getImage();
-
-
-
-        $data = [
-            "productCode" => $productCode,
-            "productName" => $productName,
-            "productPrice" => $productPrice,
-            "producer" => $producer
-        ];
-
-        $product = new Products($data);
-        $product->setProductDescription($productDescription);
-        $product->setProductImage($productImage);
-        return $product;
-    }
-
-    public function getError(): array
-    {
-        $errors = [];
-        $fields = ["productCode", "productName", "productPrice", "producer"];
-
-        foreach ($fields as $field) {
-            if (empty($_POST[$field]))
-                $errors[$field] = "Không được để trống";
-        }
-        return $errors;
+        $this->productService = new ProductService();
     }
 
     public function index()
@@ -92,9 +28,9 @@ class ProductController
         if ($_SERVER["REQUEST_METHOD"] === "GET") {
             include "View/Products/add.php";
         } else {
-            $errors = $this->getError();
+            $errors = $this->productService->getError();
             if (empty($errors)) {
-                $product = $this->getProducts();
+                $product = $this->productService->getProducts();
                 $this->productDB->create($product);
                 header("Location: index.php");
             } else {
@@ -121,11 +57,15 @@ class ProductController
         if ($_SERVER["REQUEST_METHOD"] === "GET") {
             include "View/Products/edit.php";
         } else {
-            $errors = $this->getError();
+            $errors = $this->productService->getError();
 
             if (empty($errors)) {
-                $product = $this->getProducts();
+
+                $product = $this->productService->getProducts();
                 $this->productDB->edit($id, $product);
+                $product = $this->productDB->getById($id);
+                unlink($product[0]->productImage);
+
                 header("Location: index.php");
             } else {
                 include "View/Products/edit.php";
@@ -147,7 +87,6 @@ class ProductController
         }else{
             $text = $_POST["search"];
             $products = $this->productDB->search($text);
-
         }
         include "View/Products/list.php";
 

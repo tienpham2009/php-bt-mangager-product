@@ -13,7 +13,8 @@
     "psr-4": {
       "Models\\": "App/Models",
       "App\\Controller\\": "App/Controller",
-      "App\\": "App"
+      "App\\": "App",
+      "Service\\":"Service"
     }
   },
   "require": {
